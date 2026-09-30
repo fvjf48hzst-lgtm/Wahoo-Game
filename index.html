@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>RUN!</title>
+  <title>Iron Man Runner</title>
 
   <style>
     * {
@@ -18,20 +18,19 @@
       width: 100%;
       height: 100%;
       overflow: hidden;
-      background: #080b10;
-      font-family: Arial, Helvetica, sans-serif;
+      background: #070a10;
+      font-family: Arial, sans-serif;
     }
 
     body {
       display: flex;
-      justify-content: center;
       align-items: center;
+      justify-content: center;
     }
 
-    /*
-      The game itself is always 16:9.
-      The browser scales it up/down to fit the screen.
-    */
+    /* =========================
+       GAME WINDOW
+    ========================= */
 
     #gameWrapper {
       position: relative;
@@ -42,7 +41,6 @@
       aspect-ratio: 16 / 9;
 
       overflow: hidden;
-      background: #75c9ff;
     }
 
     canvas {
@@ -59,18 +57,16 @@
     #ui {
       position: absolute;
 
-      top: 24px;
-      left: 30px;
+      top: 22px;
+      left: 28px;
 
       color: white;
 
-      font-size: 28px;
-      font-weight: 800;
-
-      letter-spacing: 1px;
+      font-size: 27px;
+      font-weight: 900;
 
       text-shadow:
-        3px 3px 0 rgba(0, 0, 0, 0.35);
+        3px 3px 0 rgba(0, 0, 0, 0.4);
 
       pointer-events: none;
     }
@@ -86,8 +82,9 @@
 
       display: none;
 
-      justify-content: center;
       align-items: center;
+      justify-content: center;
+
       flex-direction: column;
 
       background: rgba(0, 0, 0, 0.65);
@@ -98,46 +95,41 @@
     }
 
     #gameOver h1 {
-      font-size: clamp(50px, 8vw, 110px);
-
-      margin-bottom: 12px;
+      font-size: clamp(48px, 8vw, 105px);
 
       letter-spacing: 4px;
 
-      text-shadow:
-        5px 5px 0 rgba(0, 0, 0, 0.35);
+      margin-bottom: 10px;
     }
 
     #gameOver p {
-      font-size: 26px;
+      font-size: 24px;
 
-      margin-bottom: 30px;
+      margin-bottom: 26px;
     }
 
     #restartButton {
-      padding: 16px 34px;
-
       border: none;
+
       border-radius: 12px;
 
+      padding: 15px 30px;
+
       background: white;
+
       color: #111;
 
-      font-size: 20px;
+      font-size: 19px;
+
       font-weight: 800;
 
       cursor: pointer;
 
-      transition:
-        transform 0.15s ease,
-        box-shadow 0.15s ease;
+      transition: transform 0.15s ease;
     }
 
     #restartButton:hover {
-      transform: scale(1.06);
-
-      box-shadow:
-        0 8px 30px rgba(255, 255, 255, 0.25);
+      transform: scale(1.05);
     }
 
     #restartButton:active {
@@ -151,11 +143,11 @@
     #mobileJump {
       position: absolute;
 
-      right: 25px;
-      bottom: 25px;
+      right: 24px;
+      bottom: 24px;
 
-      width: 82px;
-      height: 82px;
+      width: 84px;
+      height: 84px;
 
       border-radius: 50%;
 
@@ -165,25 +157,18 @@
 
       color: white;
 
-      font-size: 16px;
-      font-weight: 800;
+      font-size: 15px;
 
-      cursor: pointer;
+      font-weight: 900;
 
       z-index: 10;
-
-      user-select: none;
-      -webkit-user-select: none;
 
       touch-action: manipulation;
     }
 
     #mobileJump:active {
       transform: scale(0.94);
-      background: rgba(0, 0, 0, 0.55);
     }
-
-    /* Hide mobile button on computers */
 
     @media (hover: hover) and (pointer: fine) {
       #mobileJump {
@@ -213,7 +198,7 @@
       </p>
 
       <button id="restartButton">
-        RUN AGAIN
+        FLY AGAIN
       </button>
 
     </div>
@@ -231,19 +216,15 @@
     // CANVAS
     // ============================================================
 
-    const canvas = document.getElementById("game");
+    const canvas =
+      document.getElementById("game");
 
-    const ctx = canvas.getContext("2d");
+    const ctx =
+      canvas.getContext("2d");
 
 
-    /*
-      IMPORTANT:
-
-      The game world is ALWAYS 1280 × 720.
-
-      This gives us a consistent widescreen world regardless
-      of the player's actual monitor or phone size.
-    */
+    // The game is always 1280 × 720.
+    // This keeps the game widescreen.
 
     const WORLD_WIDTH = 1280;
     const WORLD_HEIGHT = 720;
@@ -273,6 +254,28 @@
 
 
     // ============================================================
+    // IRON MAN IMAGE
+    // ============================================================
+
+    /*
+      IMPORTANT:
+
+      Keep iron-man.png in the SAME folder as index.html.
+
+      GitHub should look like:
+
+          index.html
+          iron-man.png
+    */
+
+    const ironMan =
+      new Image();
+
+    ironMan.src =
+      "iron-man.png";
+
+
+    // ============================================================
     // WORLD
     // ============================================================
 
@@ -285,31 +288,41 @@
 
     const player = {
 
-      /*
-        Smaller player relative to the world means we can see
-        considerably more of the environment around them.
-      */
+      // Position
 
-      x: 180,
+      x: 155,
 
-      y: groundY - 68,
+      y: groundY - 125,
 
-      width: 46,
+      // Visual size
 
-      height: 68,
+      width: 190,
+
+      height: 100,
+
+      // Collision box
+
+      hitX: 165,
+
+      hitY: groundY - 102,
+
+      hitW: 170,
+
+      hitH: 72,
+
+      // Physics
 
       velocityY: 0,
 
-      gravity: 0.75,
+      gravity: 0.72,
 
-      jumpPower: -15.5,
+      jumpPower: -14.5,
 
       grounded: true,
 
-      // Used for the running animation
+      // Animation
 
-      animationTimer: 0
-
+      bob: 0
     };
 
 
@@ -327,15 +340,8 @@
 
     let obstacleTimer = 0;
 
-    /*
-      Obstacles are now spawned WELL outside the visible
-      right edge of the game.
-
-      This creates a larger "world" ahead of the player.
-    */
-
     let nextObstacle =
-      170 + Math.random() * 120;
+      180 + Math.random() * 120;
 
 
     // ============================================================
@@ -345,14 +351,14 @@
     const clouds = [
 
       {
-        x: 140,
+        x: 130,
         y: 120,
         scale: 1
       },
 
       {
         x: 470,
-        y: 180,
+        y: 175,
         scale: 0.75
       },
 
@@ -363,7 +369,7 @@
       },
 
       {
-        x: 1150,
+        x: 1140,
         y: 155,
         scale: 0.8
       }
@@ -372,21 +378,19 @@
 
 
     // ============================================================
-    // RESET GAME
+    // RESET
     // ============================================================
 
     function resetGame() {
 
-      player.x = 180;
-
       player.y =
-        groundY - player.height;
+        groundY - 125;
 
       player.velocityY = 0;
 
       player.grounded = true;
 
-      player.animationTimer = 0;
+      player.bob = 0;
 
 
       obstacles = [];
@@ -395,20 +399,11 @@
       score = 0;
 
 
-      /*
-        Starting speed is slightly slower so the player has
-        plenty of time to react to obstacles.
-      */
-
       gameSpeed = 8;
 
 
       obstacleTimer = 0;
 
-
-      /*
-        Large initial gap before the first obstacle.
-      */
 
       nextObstacle =
         180 + Math.random() * 120;
@@ -417,12 +412,12 @@
       gameRunning = true;
 
 
-      scoreDisplay.textContent = "0";
+      scoreDisplay.textContent =
+        "0";
 
 
       gameOverScreen.style.display =
         "none";
-
     }
 
 
@@ -437,7 +432,6 @@
         restartGame();
 
         return;
-
       }
 
 
@@ -447,9 +441,7 @@
           player.jumpPower;
 
         player.grounded = false;
-
       }
-
     }
 
 
@@ -470,7 +462,6 @@
           event.preventDefault();
 
           jump();
-
         }
 
       }
@@ -478,13 +469,15 @@
 
 
     // ============================================================
-    // MOUSE / TOUCH
+    // MOUSE / TOUCH CONTROLS
     // ============================================================
 
     canvas.addEventListener(
       "pointerdown",
       function() {
+
         jump();
+
       }
     );
 
@@ -513,11 +506,6 @@
 
     function createObstacle() {
 
-      /*
-        Obstacles have different sizes so the game doesn't
-        feel completely repetitive.
-      */
-
       const obstacleHeight =
         45 + Math.random() * 55;
 
@@ -526,19 +514,15 @@
 
 
       /*
-        IMPORTANT:
+        Obstacles spawn far beyond the visible area.
 
-        Instead of spawning directly at x = 1280,
-        obstacles appear between 1450 and 1650.
-
-        This gives the player a larger field of view and
-        lets them see what's coming much earlier.
+        This gives you plenty of warning.
       */
 
       const spawnDistance =
         WORLD_WIDTH +
-        170 +
-        Math.random() * 180;
+        260 +
+        Math.random() * 240;
 
 
       obstacles.push({
@@ -556,7 +540,6 @@
           obstacleHeight
 
       });
-
     }
 
 
@@ -564,36 +547,52 @@
     // COLLISION
     // ============================================================
 
-    function collision(a, b) {
+    function collision() {
 
-      /*
-        Slightly shrink both hitboxes.
+      for (
+        const obstacle of obstacles
+      ) {
 
-        This makes collisions feel fairer than using the
-        exact visual rectangles.
-      */
+        const playerBox = {
 
-      const paddingX = 7;
+          x: player.hitX,
 
-      const paddingY = 5;
+          y: player.hitY,
+
+          width: player.hitW,
+
+          height: player.hitH
+
+        };
 
 
-      return (
+        if (
 
-        a.x + paddingX <
-          b.x + b.width - paddingX &&
+          playerBox.x <
+            obstacle.x +
+            obstacle.width &&
 
-        a.x + a.width - paddingX >
-          b.x + paddingX &&
+          playerBox.x +
+            playerBox.width >
+            obstacle.x &&
 
-        a.y + paddingY <
-          b.y + b.height - paddingY &&
+          playerBox.y <
+            obstacle.y +
+            obstacle.height &&
 
-        a.y + a.height - paddingY >
-          b.y + paddingY
+          playerBox.y +
+            playerBox.height >
+            obstacle.y
 
-      );
+        ) {
 
+          return true;
+
+        }
+
+      }
+
+      return false;
     }
 
 
@@ -604,13 +603,12 @@
     function update() {
 
       if (!gameRunning) {
+
         return;
       }
 
 
-      // ----------------------------------------------------------
       // PLAYER PHYSICS
-      // ----------------------------------------------------------
 
       player.velocityY +=
         player.gravity;
@@ -619,18 +617,17 @@
         player.velocityY;
 
 
-      // ----------------------------------------------------------
       // GROUND
-      // ----------------------------------------------------------
 
       if (
         player.y +
         player.height >=
-        groundY
+        groundY - 18
       ) {
 
         player.y =
           groundY -
+          18 -
           player.height;
 
         player.velocityY = 0;
@@ -644,17 +641,13 @@
       }
 
 
-      // ----------------------------------------------------------
-      // RUNNING ANIMATION
-      // ----------------------------------------------------------
+      // FLYING ANIMATION
 
-      player.animationTimer +=
-        0.18;
+      player.bob +=
+        0.14;
 
 
-      // ----------------------------------------------------------
       // OBSTACLE SPAWNING
-      // ----------------------------------------------------------
 
       obstacleTimer++;
 
@@ -670,13 +663,6 @@
         obstacleTimer = 0;
 
 
-        /*
-          Keep obstacle spacing generous.
-
-          As the speed increases, the game becomes harder,
-          but the player still gets warning time.
-        */
-
         nextObstacle =
           110 +
           Math.random() * 150;
@@ -684,9 +670,7 @@
       }
 
 
-      // ----------------------------------------------------------
       // MOVE OBSTACLES
-      // ----------------------------------------------------------
 
       for (
         let i = obstacles.length - 1;
@@ -704,19 +688,14 @@
 
         // Collision
 
-        if (
-          collision(
-            player,
-            obstacle
-          )
-        ) {
+        if (collision()) {
 
           endGame();
 
         }
 
 
-        // Remove once far offscreen
+        // Delete old obstacles
 
         if (
           obstacle.x +
@@ -731,9 +710,7 @@
       }
 
 
-      // ----------------------------------------------------------
       // SCORE
-      // ----------------------------------------------------------
 
       score += 0.1;
 
@@ -742,183 +719,13 @@
         Math.floor(score);
 
 
-      // ----------------------------------------------------------
-      // DIFFICULTY
-      // ----------------------------------------------------------
-
-      /*
-        The game slowly gets faster.
-
-        Maximum speed keeps it playable.
-      */
+      // GRADUALLY INCREASE SPEED
 
       if (gameSpeed < 14) {
 
         gameSpeed += 0.0015;
 
       }
-
-    }
-
-
-    // ============================================================
-    // DRAW
-    // ============================================================
-
-    function draw() {
-
-      ctx.clearRect(
-        0,
-        0,
-        WORLD_WIDTH,
-        WORLD_HEIGHT
-      );
-
-
-      // ==========================================================
-      // SKY
-      // ==========================================================
-
-      const skyGradient =
-        ctx.createLinearGradient(
-          0,
-          0,
-          0,
-          WORLD_HEIGHT
-        );
-
-
-      skyGradient.addColorStop(
-        0,
-        "#4db8ff"
-      );
-
-
-      skyGradient.addColorStop(
-        1,
-        "#e9f8ff"
-      );
-
-
-      ctx.fillStyle =
-        skyGradient;
-
-
-      ctx.fillRect(
-        0,
-        0,
-        WORLD_WIDTH,
-        WORLD_HEIGHT
-      );
-
-
-      // ==========================================================
-      // SUN
-      // ==========================================================
-
-      ctx.fillStyle =
-        "rgba(255, 235, 130, 0.9)";
-
-
-      ctx.beginPath();
-
-
-      ctx.arc(
-        1080,
-        125,
-        58,
-        0,
-        Math.PI * 2
-      );
-
-
-      ctx.fill();
-
-
-      // ==========================================================
-      // CLOUDS
-      // ==========================================================
-
-      clouds.forEach(
-        cloud => {
-
-          drawCloud(
-            cloud.x,
-            cloud.y,
-            cloud.scale
-          );
-
-        }
-      );
-
-
-      // ==========================================================
-      // DISTANT HILLS
-      // ==========================================================
-
-      drawHills();
-
-
-      // ==========================================================
-      // GROUND
-      // ==========================================================
-
-      ctx.fillStyle =
-        "#67a94e";
-
-
-      ctx.fillRect(
-        0,
-        groundY,
-        WORLD_WIDTH,
-        WORLD_HEIGHT -
-        groundY
-      );
-
-
-      // ==========================================================
-      // GROUND TOP
-      // ==========================================================
-
-      ctx.fillStyle =
-        "#3e762e";
-
-
-      ctx.fillRect(
-        0,
-        groundY,
-        WORLD_WIDTH,
-        10
-      );
-
-
-      // ==========================================================
-      // GROUND DETAILS
-      // ==========================================================
-
-      drawGroundDetails();
-
-
-      // ==========================================================
-      // OBSTACLES
-      // ==========================================================
-
-      obstacles.forEach(
-        obstacle => {
-
-          drawObstacle(
-            obstacle
-          );
-
-        }
-      );
-
-
-      // ==========================================================
-      // PLAYER
-      // ==========================================================
-
-      drawPlayer();
 
     }
 
@@ -968,7 +775,6 @@
 
 
       ctx.fill();
-
     }
 
 
@@ -979,7 +785,7 @@
     function drawHills() {
 
       ctx.fillStyle =
-        "rgba(75, 150, 100, 0.35)";
+        "rgba(75,150,100,0.35)";
 
 
       ctx.beginPath();
@@ -1039,20 +845,40 @@
 
 
       ctx.fill();
-
     }
 
 
     // ============================================================
-    // GROUND DETAILS
+    // DRAW GROUND
     // ============================================================
 
-    function drawGroundDetails() {
+    function drawGround() {
 
-      /*
-        Little lines moving underneath the player give the
-        impression that the world is moving quickly.
-      */
+      ctx.fillStyle =
+        "#67a94e";
+
+
+      ctx.fillRect(
+        0,
+        groundY,
+        WORLD_WIDTH,
+        WORLD_HEIGHT - groundY
+      );
+
+
+      ctx.fillStyle =
+        "#3e762e";
+
+
+      ctx.fillRect(
+        0,
+        groundY,
+        WORLD_WIDTH,
+        10
+      );
+
+
+      // Moving ground marks
 
       const offset =
         (score * 8) % 100;
@@ -1101,7 +927,7 @@
         obstacle.height;
 
 
-      // Main body
+      // Main obstacle
 
       ctx.fillStyle =
         "#8b4513";
@@ -1146,125 +972,198 @@
 
 
     // ============================================================
-    // DRAW PLAYER
+    // DRAW IRON MAN
     // ============================================================
 
     function drawPlayer() {
 
-      const x =
-        player.x;
+      /*
+        Use the uploaded Iron Man image.
 
-      const y =
-        player.y;
+        The image needs to be called:
 
+            iron-man.png
 
-      // Body
+        and must be in the same folder as index.html.
+      */
 
-      ctx.fillStyle =
-        "#20242b";
+      if (
+        ironMan.complete &&
+        ironMan.naturalWidth
+      ) {
 
-
-      ctx.fillRect(
-        x,
-        y,
-        player.width,
-        player.height
-      );
-
-
-      // Head highlight
-
-      ctx.fillStyle =
-        "#343a43";
+        const bob =
+          player.grounded
+            ? Math.sin(player.bob) * 2
+            : 0;
 
 
-      ctx.fillRect(
-        x + 5,
-        y + 5,
-        player.width - 10,
-        22
-      );
+        ctx.save();
 
 
-      // Eye
+        // Small shadow to separate Iron Man from the background
 
-      ctx.fillStyle =
-        "white";
+        ctx.shadowColor =
+          "rgba(0,0,0,0.25)";
 
+        ctx.shadowBlur = 10;
 
-      ctx.fillRect(
-        x + 30,
-        y + 13,
-        7,
-        7
-      );
+        ctx.shadowOffsetY = 8;
 
 
-      // Eye pupil
+        ctx.drawImage(
 
-      ctx.fillStyle =
-        "#111";
+          ironMan,
 
+          player.x - 20,
 
-      ctx.fillRect(
-        x + 33,
-        y + 15,
-        3,
-        3
-      );
+          player.y - 15 + bob,
 
+          230,
 
-      // ----------------------------------------------------------
-      // RUNNING LEGS
-      // ----------------------------------------------------------
+          122
 
-      ctx.fillStyle =
-        "#20242b";
-
-
-      if (player.grounded) {
-
-        const legAnimation =
-          Math.sin(
-            player.animationTimer
-          ) * 6;
-
-
-        ctx.fillRect(
-          x + 5,
-          y + player.height,
-          12,
-          13 + legAnimation
         );
 
 
-        ctx.fillRect(
-          x + 29,
-          y + player.height,
-          12,
-          13 - legAnimation
-        );
+        ctx.restore();
 
       } else {
 
-        // Legs tucked slightly while jumping
+        // Temporary fallback while image loads
 
-        ctx.fillRect(
-          x + 4,
-          y + player.height - 2,
-          14,
-          10
-        );
+        ctx.fillStyle =
+          "#b51f25";
 
 
         ctx.fillRect(
-          x + 28,
-          y + player.height - 2,
-          14,
-          10
+
+          player.x,
+
+          player.y,
+
+          player.width,
+
+          player.height
+
         );
 
       }
+
+    }
+
+
+    // ============================================================
+    // DRAW EVERYTHING
+    // ============================================================
+
+    function draw() {
+
+      ctx.clearRect(
+        0,
+        0,
+        WORLD_WIDTH,
+        WORLD_HEIGHT
+      );
+
+
+      // SKY
+
+      const sky =
+        ctx.createLinearGradient(
+          0,
+          0,
+          0,
+          WORLD_HEIGHT
+        );
+
+
+      sky.addColorStop(
+        0,
+        "#4db8ff"
+      );
+
+
+      sky.addColorStop(
+        1,
+        "#e9f8ff"
+      );
+
+
+      ctx.fillStyle =
+        sky;
+
+
+      ctx.fillRect(
+        0,
+        0,
+        WORLD_WIDTH,
+        WORLD_HEIGHT
+      );
+
+
+      // SUN
+
+      ctx.fillStyle =
+        "rgba(255,235,130,0.9)";
+
+
+      ctx.beginPath();
+
+
+      ctx.arc(
+        1080,
+        125,
+        58,
+        0,
+        Math.PI * 2
+      );
+
+
+      ctx.fill();
+
+
+      // CLOUDS
+
+      clouds.forEach(
+        cloud => {
+
+          drawCloud(
+            cloud.x,
+            cloud.y,
+            cloud.scale
+          );
+
+        }
+      );
+
+
+      // HILLS
+
+      drawHills();
+
+
+      // GROUND
+
+      drawGround();
+
+
+      // OBSTACLES
+
+      obstacles.forEach(
+        obstacle => {
+
+          drawObstacle(
+            obstacle
+          );
+
+        }
+      );
+
+
+      // IRON MAN
+
+      drawPlayer();
 
     }
 
@@ -1327,11 +1226,10 @@
 
 
     // ============================================================
-    // START GAME
+    // START
     // ============================================================
 
     resetGame();
-
 
     requestAnimationFrame(
       gameLoop
